@@ -15,7 +15,6 @@ import {
   TableEmptyRows,
   TableHeadCustom,
   TableNoData,
-  TablePaginationCustom,
   TableSkeleton,
   useTable,
 } from 'src/components/table';
@@ -39,7 +38,6 @@ const TaskListView = forwardRef(
       defaultFilters = {
         status: '',
       },
-      onSelectLine,
       onAddTask,
       onDeleteTask,
     }: {
@@ -50,7 +48,7 @@ const TaskListView = forwardRef(
     },
     ref
   ) => {
-    const table = useTable();
+    const table = useTable({ defaultRowsPerPage: 999 });
 
     // 使用 localStorage 管理任务数据
     const localStorage = useLocalStorage('tasks', { tasks: [] as ITaskItem[] });
@@ -123,11 +121,6 @@ const TaskListView = forwardRef(
       order: table.order,
     });
 
-    // const dataInPage = dataFiltered.slice(
-    //   table.page * table.rowsPerPage,
-    //   table.page * table.rowsPerPage + table.rowsPerPage
-    // );
-
     const denseHeight = table.dense ? 60 : 80;
 
     const canReset = !isEqual(defaultFilters, filters);
@@ -180,37 +173,6 @@ const TaskListView = forwardRef(
         table.setOrder('asc');
       }
     }, [table]);
-
-    // const handleDeleteRows = useCallback(() => {
-    //   const updatedTasks = tableData.filter((row) => !table.selected.includes(row.sensor_id));
-    //   localStorage.update('tasks', updatedTasks);
-
-    //   table.onUpdatePageDeleteRows({
-    //     totalRows: tableData.length,
-    //     totalRowsInPage: dataInPage.length,
-    //     totalRowsFiltered: dataFiltered.length,
-    //   });
-    // }, [dataFiltered.length, dataInPage.length, table, tableData, localStorage]);
-
-    // const handleEditRow = (row: ITaskItem) => {
-    //   // 最佳实现：根据行 ID 读取行信息，然后 setEditRow
-    //   setEditRow(row);
-
-    //   quickEdit.onTrue();
-    // };
-
-    // const handleRetrieveKey = (row: ITaskItem) => {};
-
-    // const handleImportKey = (row: ITaskItem) => {};
-
-    // const handleResetFilters = useCallback(() => {
-    //   setFilters(defaultFilters);
-    // }, [defaultFilters]);
-
-    // const onQuickEditFormSubmitted = () => {
-    //   getList();
-    //   quickEdit.onFalse();
-    // };
 
     useImperativeHandle(ref, () => ({
       table,
@@ -265,11 +227,6 @@ const TaskListView = forwardRef(
                               row={row}
                               selected={row.due !== undefined}
                               onSelectRow={() => handleTaskComplete(row.id)}
-                              onSelectLine={onSelectLine}
-                              // onEditRow={() => handleEditRow(row.sensor_id)}
-                              onEditRow={() => {}}
-                              onRetrieveKey={() => {}}
-                              onImportKey={() => {}}
                             />
                           ))
                     )}
@@ -285,7 +242,8 @@ const TaskListView = forwardRef(
               {/* </Scrollbar> */}
             </TableContainer>
 
-            <TablePaginationCustom
+{/* 隐藏分页组件，默认显示999行 */}
+            {/* <TablePaginationCustom
               count={dataFiltered.length}
               page={table.page}
               rowsPerPage={table.rowsPerPage}
@@ -294,7 +252,7 @@ const TaskListView = forwardRef(
               //
               dense={table.dense}
               onChangeDense={table.onChangeDense}
-            />
+            /> */}
           </Card>
         </Container>
 
