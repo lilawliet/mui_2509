@@ -1,6 +1,6 @@
 # CI/CD 故障排除指南
 
-## 问题：Dependencies lock file is not found
+## 问题 1：Dependencies lock file is not found
 
 ### 错误信息
 ```
@@ -11,7 +11,45 @@ Supported file patterns: package-lock.json,npm-shrinkwrap.json,yarn.lock
 ### 问题原因
 这个错误是因为 GitHub Actions 工作流中的包管理器检测和缓存配置不正确。项目使用的是 `pnpm`，但工作流配置只识别 npm 和 yarn 的锁文件。
 
-### 解决方案
+## 问题 2：pnpm-lock.yaml 版本不兼容
+
+### 错误信息
+```
+WARN  Ignoring not compatible lockfile at /home/runner/work/mui_2509/mui_2509/pnpm-lock.yaml
+ERR_PNPM_NO_LOCKFILE  Cannot install with "frozen-lockfile" because pnpm-lock.yaml is absent
+```
+
+### 问题原因
+本地开发环境使用的 pnpm 版本（如 10.x）与 GitHub Actions 中配置的版本（如 8.x）不匹配，导致锁文件版本不兼容。
+
+### 解决方案（问题 2）
+
+#### 1. 更新 pnpm 版本
+确保 GitHub Actions 中的 pnpm 版本与本地开发环境一致：
+
+```yaml
+- name: Setup pnpm
+  if: steps.detect-package-manager.outputs.manager == 'pnpm'
+  uses: pnpm/action-setup@v4
+  with:
+    version: 10  # 更新为与本地环境匹配的版本
+```
+
+#### 2. 添加备用安装策略
+修改安装步骤以处理锁文件不兼容的情况：
+
+```yaml
+- name: Install dependencies
+  run: |
+    if [ "${{ steps.detect-package-manager.outputs.manager }}" = "pnpm" ]; then
+      # 尝试使用 frozen-lockfile，如果失败则回退到普通安装
+      pnpm install --frozen-lockfile || pnpm install
+    else
+      ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+    fi
+```
+
+### 解决方案（问题 1）
 
 #### 1. 修复包管理器检测逻辑
 在 `.github/workflows/nextjs.yml` 中，更新包管理器检测逻辑以支持 pnpm：

@@ -61,7 +61,7 @@ jobs:
         if: steps.detect-package-manager.outputs.manager == 'pnpm'
         uses: pnpm/action-setup@v4
         with:
-          version: 8
+          version: 10
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
@@ -89,7 +89,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock', '**/pnpm-lock.yaml') }}-
       - name: Install dependencies
-        run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+        run: |
+          if [ "${{ steps.detect-package-manager.outputs.manager }}" = "pnpm" ]; then
+            # 尝试使用 frozen-lockfile，如果失败则回退到普通安装
+            pnpm install --frozen-lockfile || pnpm install
+          else
+            ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+          fi
       - name: Build with Next.js
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
       - name: Upload artifact
