@@ -15,6 +15,7 @@ import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 // types
 import { IDeviceTableFilters, IDeviceTableFilterValue } from '../../types/device';
+import { Button } from '@mui/material';
 
 
 // ----------------------------------------------------------------------
@@ -112,138 +113,40 @@ export default function DeviceTableToolbar({ filters, onFilters }: Props) {
           pr: { xs: 2.5, md: 1 },
         }}
       >
-        <FormControl
-          sx={{
-            flexShrink: 0,
-            width: { xs: 1, md: 200 },
-          }}
-        >
-          <InputLabel>{'Sites'}</InputLabel>
-          <Select
-            value={filters.site}
-            onChange={handleFilterSite}
-            input={<OutlinedInput label={'Sites'} />}
-          >
-            {/* {sites.map((option) => (
-              <MenuItem key={option.site_id} value={option.site_id}>
-                {option.name_en}
-              </MenuItem>
-            ))} */}
-          </Select>
-        </FormControl>
-        {/* <FormControl
-          sx={{
-            flexShrink: 0,
-            width: { xs: 1, md: 200 },
-          }}
-        >
-          <InputLabel>{t('Sites')}</InputLabel>
-
-          <Select
-            multiple
-            value={filters.sites}
-            onChange={handleFilterSites}
-            input={<OutlinedInput label={t('Sites')} />}
-            renderValue={(selected) => selected.map((value) => value).join(', ')}
-            MenuProps={{
-              PaperProps: {
-                sx: { maxHeight: 240 },
-              },
-            }}
-          >
-            {sites.map((option) => (
-              <MenuItem key={option.site_id} value={option.site_id}>
-                <Checkbox
-                  disableRipple
-                  size="small"
-                  checked={filters.sites.includes(option.site_id)}
-                />
-                {option.name_en}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl
-          sx={{
-            flexShrink: 0,
-            width: { xs: 1, md: 200 },
-          }}
-        >
-          <InputLabel>{t('Areas')}</InputLabel>
-
-          <Select
-            multiple
-            value={filters.areas}
-            onChange={handleFilterAreas}
-            input={<OutlinedInput label={t('Areas')} />}
-            renderValue={(selected) => selected.map((value) => value).join(', ')}
-            sx={{ textTransform: 'capitalize' }}
-          >
-            {areas.map((option) => (
-              <MenuItem key={option.site_area_id} value={option.site_area_id}>
-                <Checkbox
-                  disableRipple
-                  size="small"
-                  checked={filters.areas.includes(option.site_area_id)}
-                />
-                {option.area_name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl
-          sx={{
-            flexShrink: 0,
-            width: { xs: 1, md: 200 },
-          }}
-        >
-          <InputLabel>{t('Zones')}</InputLabel>
-
-          <Select
-            multiple
-            value={filters.zones}
-            onChange={handleFilterZones}
-            input={<OutlinedInput label={t('Zones')} />}
-            renderValue={(selected) => selected.map((value) => value).join(', ')}
-            sx={{ textTransform: 'capitalize' }}
-          >
-            {zones.map((option) => (
-              <MenuItem key={option.zone_id} value={option.zone_id}>
-                <Checkbox
-                  disableRipple
-                  size="small"
-                  checked={filters.zones.includes(option.zone_id)}
-                />
-                {option.name_en}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl> */}
+ 
+       
         <Stack direction="row" alignItems="center" spacing={2} flexGrow={1} sx={{ width: 1 }}>
-          <TextField
-            fullWidth
-            value={filters.name}
-            onChange={handleFilterName}
-            placeholder={'Search...'}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Iconify icon="eva:search-fill" sx={{ color: 'text.disabled' }} />
-                </InputAdornment>
-              ),
-            }}
-          />
 
+          {/* New Task */}
+          <Button
+            variant="contained"
+            startIcon={<Iconify icon="material-symbols-light:add" />}
+            onClick={() => {
+            }}
+          >
+            New Task
+          </Button>
+
+          {/* Filter */}
           <IconButton onClick={popover.onOpen}>
-            <Iconify icon="eva:more-vertical-fill" />
+            <Iconify icon="mage:filter" />
           </IconButton>
+
+          {/* Sorter */}
+          <IconButton onClick={() => {
+       
+          }}>
+            <Iconify icon="mi:sort" />
+          </IconButton>
+
+
         </Stack>
       </Stack>
 
       <CustomPopover
         open={popover.open}
         onClose={popover.onClose}
-        arrow="right-top"
+        arrow="top-center"
         sx={{ width: 140 }}
       >
         <MenuItem

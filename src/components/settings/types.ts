@@ -1,4 +1,3 @@
-import GridLayout from 'react-grid-layout';
 // ----------------------------------------------------------------------
 
 export type SettingsValueProps = {

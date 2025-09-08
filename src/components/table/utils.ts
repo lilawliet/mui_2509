@@ -12,6 +12,12 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] === null) {
     return -1;
   }
+  if (a[orderBy] === undefined || b[orderBy] === undefined) {
+    // If either value is undefined, treat undefined as less than any defined value
+    if (a[orderBy] === undefined && b[orderBy] !== undefined) return 1;
+    if (b[orderBy] === undefined && a[orderBy] !== undefined) return -1;
+    return 0;
+  }
   if (b[orderBy] < a[orderBy]) {
     return -1;
   }

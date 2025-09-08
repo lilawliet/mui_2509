@@ -9,10 +9,10 @@ type Props = {
 };
 
 export function useDoubleClick({ click, doubleClick, timeout = 250 }: Props) {
-  const clickTimeout = useRef<any>();
+  const clickTimeout = useRef<any>(null);
 
   const clearClickTimeout = () => {
-    if (clickTimeout) {
+    if (clickTimeout.current) {
       clearTimeout(clickTimeout.current);
       clickTimeout.current = null;
     }
@@ -30,6 +30,7 @@ export function useDoubleClick({ click, doubleClick, timeout = 250 }: Props) {
         doubleClick(event);
       }
     },
-    [click, doubleClick, timeout]
+    // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+    [click, doubleClick, timeout, clearClickTimeout]
   );
 }

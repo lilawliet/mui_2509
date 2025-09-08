@@ -9,6 +9,7 @@ import Container from '@mui/material/Container';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableContainer from '@mui/material/TableContainer';
+import Typography from '@mui/material/Typography';
 // routes
 import { Box } from '@mui/material';
 
@@ -199,7 +200,9 @@ const DeviceListView = forwardRef(
     return (
     
         <Container maxWidth={'lg'}>
-
+          <Typography variant="h4" sx={{ mb: 3 }}>
+            Tasks
+          </Typography>
 
           <Card>
             <DeviceTableToolbar filters={filters} onFilters={handleFilters} />

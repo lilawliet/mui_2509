@@ -1,6 +1,7 @@
 // ----------------------------------------------------------------------
 
 export function getPosition(arrow: string) {
+  // biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
   let props;
 
   switch (arrow) {
