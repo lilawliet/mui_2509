@@ -1,3 +1,5 @@
+'use client';
+
 import isEqual from 'lodash/isEqual';
 import { useEffect, useMemo, useCallback, useState } from 'react';
 // hooks
