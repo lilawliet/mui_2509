@@ -1,19 +1,16 @@
-'use client';
-
 import isEqual from 'lodash/isEqual';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 // @mui
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import Container from '@mui/material/Container';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableContainer from '@mui/material/TableContainer';
-// routes
-import { Box } from '@mui/material';
+// hooks
+import { useBoolean } from 'src/hooks/use-boolean';
 
+// components
 import Iconify from 'src/components/iconify';
-// import Scrollbar from 'src/components/scrollbar';
 import {
   emptyRows,
   getComparator,
@@ -26,15 +23,11 @@ import {
   useTable,
 } from 'src/components/table';
 // types
-import { IDeviceItem, IDeviceTableFilters, IDeviceTableFilterValue } from 'src/types/device';
+import type { IDeviceItem, IDeviceTableFilters, IDeviceTableFilterValue } from 'src/types/device';
 //
 import { useSnackbar } from 'src/components/snackbar';
-// import { useLocales } from 'src/locales';
-import DeviceTableRow from 'src/sections/_device/device-table-row';
-import DeviceTableToolbar from 'src/sections/_device/device-table-toolbar';
-
-// hooks
-import { useBoolean } from 'src/hooks/use-boolean';
+import DeviceTableRow from '../device-table-row';
+import DeviceTableToolbar from '../device-table-toolbar';
 
 // ----------------------------------------------------------------------
 
@@ -71,7 +64,6 @@ const DeviceListView = forwardRef(
     },
     ref
   ) => {
-  
 
     const table = useTable();
 
@@ -90,16 +82,16 @@ const DeviceListView = forwardRef(
     // const { devices, devicesLoading, devicesEmpty } = useGetDevices();
     // const { devices: datas, devicesLoading: loading, devicesEmpty: empty } = useGetDevices();
 
-    const confirm = useBoolean();
 
     const quickEdit = useBoolean();
     const [editRow, setEditRow] = useState<IDeviceItem>();
 
     // 表头
     const TABLE_HEAD = [
-      { id: 'site_id', label: 'Site ID', width: 240 },
-      { id: 'lines', label: 'Lines', width: 240 },
-      { id: '', width: 88 },
+      { id: 'title', label: 'Task Title', width: 240 },
+      { id: 'due', label: 'Due Date' },
+      { id: 'created', label: 'Created at', width: 380 },
+      { id: 'taks', label: 'Tasks ID', width: 88 },
     ];
 
     const [loading, setLoading] = useState(false);
@@ -107,9 +99,33 @@ const DeviceListView = forwardRef(
 
     const getList = useCallback(() => {
       setLoading(true);
+
+      // TODO: Get list
+
       setTableData([]);
       setEmpty(false);
       setLoading(false);
+
+      // getDeviceList({
+      //   site_id: filters.site,
+      //   sort_floor_id: filters.sort_floor_id,
+      //   sort_area_id: filters.sort_area_id,
+      //   sort_zone_id: filters.sort_zone_id,
+      //   sort_ip_address: filters.sort_ip_address,
+      //   page_no: table.page,
+      //   input_row: table.rowsPerPage,
+      // })
+      //   .then((res) => {
+      //     setTableData(res.data.devices);
+      //     setEmpty(false);
+      //   })
+      //   .catch((err) => {
+      //     enqueueSnackbar(JSON.stringify(err.message), { variant: 'error' });
+      //     setEmpty(true);
+      //   })
+      //   .finally(() => {
+      //     setLoading(false);
+      //   });
     }, []);
 
     useEffect(() => {
@@ -146,7 +162,7 @@ const DeviceListView = forwardRef(
     const handleFilters = useCallback(
       (name: string, value: IDeviceTableFilterValue) => {
         table.onResetPage();
-        setFilters((prevState) => ({
+        setFilters((prevState: IDeviceTableFilters) => ({
           ...prevState,
           [name]: value,
         }));
@@ -200,12 +216,12 @@ const DeviceListView = forwardRef(
     }));
 
     return (
-    
-        <Container maxWidth={'lg'}>
-
-
+      <>
+        {/* <Container maxWidth={settings.themeStretch ? false : 'lg'}> */}
+        <Container maxWidth='lg'>
           <Card>
             <DeviceTableToolbar filters={filters} onFilters={handleFilters} />
+
 
             <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
               <TableSelectedAction
@@ -250,7 +266,8 @@ const DeviceListView = forwardRef(
                         <TableSkeleton key={i.toString()} sx={{ height: denseHeight }} />
                       ))
                     ) : (
-                      dataFiltered
+                      <>
+                        {dataFiltered
                           .slice(
                             table.page * table.rowsPerPage,
                             table.page * table.rowsPerPage + table.rowsPerPage
@@ -268,7 +285,8 @@ const DeviceListView = forwardRef(
                               onRetrieveKey={() => handleRetrieveKey(row)}
                               onImportKey={() => handleImportKey(row)}
                             />
-                          ))
+                          ))}
+                      </>
                     )}
 
                     <TableEmptyRows
@@ -295,7 +313,31 @@ const DeviceListView = forwardRef(
           </Card>
         </Container>
 
-      
+   
+        {/* <ConfirmDialog
+          open={confirm.value}
+          onClose={confirm.onFalse}
+          title={t('Delete')}
+          content={
+            <>
+              {t('Are you sure want to delete')}&nbsp;<strong>{table.selected.length}</strong>&nbsp;
+              {t('items?')}
+            </>
+          }
+          action={
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => {
+                handleDeleteRows();
+                confirm.onFalse();
+              }}
+            >
+              {t('Delete')}
+            </Button>
+          }
+        /> */}
+      </>
     );
   }
 );
