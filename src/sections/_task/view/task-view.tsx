@@ -1,7 +1,6 @@
 'use client';
 
-import isEqual from 'lodash/isEqual';
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useState, useRef } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 import Container from '@mui/material/Container';
@@ -14,7 +13,6 @@ import {
   emptyRows,
   TableEmptyRows,
   TableHeadCustom,
-  TableNoData,
   TableSkeleton,
   useTable,
 } from 'src/components/table';
@@ -29,6 +27,7 @@ import TaskTableToolbar from 'src/sections/_task/task-table-toolbar';
 import { useLocalStorage } from 'src/hooks/use-local-storage';
 import { useAutoIncrementId } from 'src/hooks/use-auto-increment-id';
 import dayjs from 'dayjs';
+import TaskTableEditRow, { type TaskTableEditRowRef } from '../task-table-edit-row';
 
 // ----------------------------------------------------------------------
 
@@ -54,6 +53,9 @@ const TaskListView = forwardRef(
     const localStorage = useLocalStorage('tasks', { tasks: [] as ITaskItem[] });
     const tableData = localStorage.state.tasks;
     
+    // TaskTableEditRow 的 ref
+    const editRowRef = useRef<TaskTableEditRowRef>(null);
+    
     // 使用自增 ID
     const autoIncrementId = useAutoIncrementId('taskAutoId', 1);
     
@@ -68,19 +70,22 @@ const TaskListView = forwardRef(
     ];
 
     const [loading, setLoading] = useState(false);
-    const [empty, setEmpty] = useState(false);
 
     const getList = useCallback(() => {
       setLoading(true);
-      setEmpty(tableData.length === 0);
       setLoading(false);
-    }, [tableData.length]);
+    }, []);
 
     // 添加新任务
-    const handleAddTask = useCallback(() => {
+    const handleAddTask = useCallback(( title: string) => {
+
+      if (title.trim() === '') {
+        return;
+      }
+
       const taskId = autoIncrementId.getNextId();
       const newTask: ITaskItem = {
-        title: `Task ${taskId}`,
+        title: title,
         due: undefined,
         created: new Date(),
         id: taskId.toString(),
@@ -92,6 +97,15 @@ const TaskListView = forwardRef(
       // 调用外部回调
       onAddTask?.();
     }, [tableData, localStorage, onAddTask, autoIncrementId]);
+
+    // 处理工具栏添加任务按钮点击
+    const handleAddTaskClick = useCallback(() => {
+      // 让输入框获得焦点
+      editRowRef.current?.focus();
+      
+      // 调用外部回调
+      onAddTask?.();
+    }, [onAddTask]);
 
     const handleDeleteTask = useCallback(() => {
       // 删除所有任务
@@ -122,10 +136,6 @@ const TaskListView = forwardRef(
     });
 
     const denseHeight = table.dense ? 60 : 80;
-
-    const canReset = !isEqual(defaultFilters, filters);
-
-    const notFound = (!dataFiltered.length && canReset) || empty;
 
     const handleFilters = useCallback(
       (name: string, value: ITaskTableFilterValue) => {
@@ -186,7 +196,7 @@ const TaskListView = forwardRef(
           </Typography>
 
           <Card>
-            <TaskTableToolbar filters={filters} onFilters={handleFilters} onAddTask={handleAddTask} onDeleteTask={handleDeleteTask} onSort={handleSort} orderBy={table.orderBy} order={table.order} />
+            <TaskTableToolbar filters={filters} onFilters={handleFilters} onAddTask={handleAddTaskClick} onDeleteTask={handleDeleteTask} onSort={handleSort} orderBy={table.orderBy} order={table.order} />
 
             <TableContainer  sx={{ position: 'relative', overflow: 'unset' }}>
               {/* <TableSelectedAction
@@ -230,13 +240,16 @@ const TaskListView = forwardRef(
                             />
                           ))
                     )}
-
+                    <TaskTableEditRow
+                      ref={editRowRef}
+                      onEnter={handleAddTask}
+                    />
                     <TableEmptyRows
                       height={denseHeight}
                       emptyRows={emptyRows(table.page, table.rowsPerPage, tableData.length)}
                     />
 
-                    <TableNoData notFound={notFound} />
+                    {/* <TableNoData notFound={notFound} /> */}
                   </TableBody>
                 </Table>
               {/* </Scrollbar> */}
