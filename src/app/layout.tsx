@@ -7,8 +7,6 @@ import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
 import { HelmetProvider } from 'react-helmet-async';
 import theme from '@/theme';
 import ModeSwitch from '@/components/ModeSwitch';
-import { SettingsProvider } from '@/components/settings';
-import { defaultSettings } from '@/settings/config-settings';
 
 export default function RootLayout(props: { children: React.ReactNode }) {
   return (
@@ -17,7 +15,6 @@ export default function RootLayout(props: { children: React.ReactNode }) {
         <InitColorSchemeScript attribute="class" />
         <AppRouterCacheProvider options={{ enableCssLayer: true }}>
           <HelmetProvider>
-            <SettingsProvider defaultSettings={defaultSettings}>
               <ThemeProvider theme={theme}>
 
                   {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
@@ -25,7 +22,6 @@ export default function RootLayout(props: { children: React.ReactNode }) {
                   <ModeSwitch />
                   {props.children}
               </ThemeProvider>
-            </SettingsProvider>
           </HelmetProvider>
         </AppRouterCacheProvider>
       </body>

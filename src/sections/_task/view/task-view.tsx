@@ -89,6 +89,7 @@ const TaskListView = forwardRef(
         due: undefined,
         created: new Date(),
         id: taskId.toString(),
+        done: false,
       };
 
       const updatedTasks = [...tableData, newTask];
@@ -155,7 +156,8 @@ const TaskListView = forwardRef(
           if (task.id === id) {
             return {
               ...task,
-              due: task.due ? undefined : new Date(), // 如果已完成则取消完成，否则标记为完成
+              // due: task.due ? undefined : new Date(), // 如果已完成则取消完成，否则标记为完成
+              done: !task.done,
             };
           }
           return task;
@@ -164,6 +166,18 @@ const TaskListView = forwardRef(
       },
       [tableData, localStorage]
     );
+
+    const handleUpdateDue = useCallback(
+      (id: string, due: Date) => {
+        const updatedTasks = tableData.map((task: ITaskItem) => {
+          if (task.id === id) {
+            return { ...task, due };
+          }
+    
+        return task;
+      });
+      localStorage.update('tasks', updatedTasks);
+    }, [tableData, localStorage]);
 
     // 处理排序
     const handleSort = useCallback((field: string) => {
@@ -199,17 +213,7 @@ const TaskListView = forwardRef(
             <TaskTableToolbar filters={filters} onFilters={handleFilters} onAddTask={handleAddTaskClick} onDeleteTask={handleDeleteTask} onSort={handleSort} orderBy={table.orderBy} order={table.order} />
 
             <TableContainer  sx={{ position: 'relative', overflow: 'unset' }}>
-              {/* <TableSelectedAction
-                dense={table.dense}
-                numSelected={table.selected.length}
-                rowCount={tableData.length}
-                onSelectAllRows={(checked) =>
-                  table.onSelectAllRows(
-                    checked,
-                    tableData.map((row: ITaskItem) => row.id)
-                  )
-                }
-              /> */}
+  
               {/* <Scrollbar> */}
                 <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
                   <TableHeadCustom
@@ -235,8 +239,9 @@ const TaskListView = forwardRef(
                             <TaskTableRow
                               key={row.id}
                               row={row}
-                              selected={row.due !== undefined}
+                              selected={row.done} 
                               onSelectRow={() => handleTaskComplete(row.id)}
+                              onUpdateDue={handleUpdateDue}
                             />
                           ))
                     )}
@@ -291,9 +296,9 @@ function applyFilter({
     if (status === 'all') {
       return inputData;
     }else if (status === 'active') {
-      return inputData.filter((task: ITaskItem) => !task.due);
+      return inputData.filter((task: ITaskItem) => !task.done);
     }else if (status === 'completed') {
-      return inputData.filter((task: ITaskItem) => task.due);
+      return inputData.filter((task: ITaskItem) => task.done);
     }
   }
 

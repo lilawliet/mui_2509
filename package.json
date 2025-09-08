@@ -16,6 +16,7 @@
     "@mui/icons-material": "latest",
     "@mui/material": "latest",
     "@mui/material-nextjs": "latest",
+    "@mui/x-date-pickers": "^8.11.1",
     "@types/lodash": "^4.17.20",
     "dayjs": "^1.11.18",
     "lodash": "^4.17.21",
