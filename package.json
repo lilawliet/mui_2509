@@ -17,6 +17,7 @@
     "@mui/material": "latest",
     "@mui/material-nextjs": "latest",
     "@types/lodash": "^4.17.20",
+    "dayjs": "^1.11.18",
     "lodash": "^4.17.21",
     "next": "^15.0.0",
     "notistack": "^3.0.2",

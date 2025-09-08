@@ -12,87 +12,61 @@ import Typography from '@mui/material/Typography';
 // routes
 import {
   emptyRows,
-  getComparator,
   TableEmptyRows,
   TableHeadCustom,
   TableNoData,
   TablePaginationCustom,
-  TableSelectedAction,
   TableSkeleton,
   useTable,
 } from 'src/components/table';
 // types
-import { ITaskItem, ITaskTableFilters, ITaskTableFilterValue } from 'src/types/task';
+import type { ITaskItem, ITaskTableFilters, ITaskTableFilterValue } from 'src/types/task';
 //
 // import { useLocales } from 'src/locales';
 import TaskTableRow from 'src/sections/_task/task-table-row';
 import TaskTableToolbar from 'src/sections/_task/task-table-toolbar';
 
 // hooks
-import { useBoolean } from 'src/hooks/use-boolean';
-
-// ----------------------------------------------------------------------
-
-// const defaultFilters: ITaskTableFilters = {
-//   name: '',
-//   site: '',
-//   sort_floor_id: false,
-//   sort_area_id: false,
-//   sort_zone_id: false,
-//   sort_ip_address: false,
-// };
+import { useLocalStorage } from 'src/hooks/use-local-storage';
+import { useAutoIncrementId } from 'src/hooks/use-auto-increment-id';
+import dayjs from 'dayjs';
 
 // ----------------------------------------------------------------------
 
 const TaskListView = forwardRef(
   (
     {
-      operations = true,
       defaultFilters = {
-        name: '',
-        site: '',
-        sort_floor_id: false,
-        sort_area_id: false,
-        sort_zone_id: false,
-        sort_ip_address: false,
+        status: '',
       },
-      onSelected,
       onSelectLine,
+      onAddTask,
+      onDeleteTask,
     }: {
-      operations?: boolean;
       defaultFilters?: ITaskTableFilters;
-      onSelected?: (rows: ITaskItem[]) => void;
       onSelectLine?: (selected: string[]) => void;
+      onAddTask?: () => void;
+      onDeleteTask?: () => void;
     },
     ref
   ) => {
-  
-
     const table = useTable();
 
-
-
-    const [tableData, setTableData] = useState<ITaskItem[]>([]);
-
+    // 使用 localStorage 管理任务数据
+    const localStorage = useLocalStorage('tasks', { tasks: [] as ITaskItem[] });
+    const tableData = localStorage.state.tasks;
+    
+    // 使用自增 ID
+    const autoIncrementId = useAutoIncrementId('taskAutoId', 1);
+    
     const [filters, setFilters] = useState(defaultFilters);
-
-    // const { sites, areas, zones } = useLocationModuleLocal();
-
-    // 通过 swr 方式缓存接口返回信息
-    // const { tasks, tasksLoading, tasksEmpty } = useGetTasks();
-    // const { tasks: datas, tasksLoading: loading, tasksEmpty: empty } = useGetTasks();
-
-    const confirm = useBoolean();
-
-    const quickEdit = useBoolean();
-    const [editRow, setEditRow] = useState<ITaskItem>();
 
     // 表头
     const TABLE_HEAD = [
       { id: 'title', label: 'Task Title', width: 240 },
-      { id: 'due', label: 'Due Date' },
-      { id: 'created', label: 'Created at', width: 380 },
-      { id: 'id', label: 'Tasks ID', width: 88 },
+      { id: 'due', label: 'Due Date', width: 200 },
+      { id: 'created', label: 'Created at', width: 200 },
+      { id: 'id', label: 'Tasks ID', width: 80, align: 'right' as const },
     ];
 
     const [loading, setLoading] = useState(false);
@@ -100,35 +74,59 @@ const TaskListView = forwardRef(
 
     const getList = useCallback(() => {
       setLoading(true);
-      setTableData([]);
-      setEmpty(false);
+      setEmpty(tableData.length === 0);
       setLoading(false);
-    }, []);
+    }, [tableData.length]);
+
+    // 添加新任务
+    const handleAddTask = useCallback(() => {
+      const taskId = autoIncrementId.getNextId();
+      const newTask: ITaskItem = {
+        title: `Task ${taskId}`,
+        due: undefined,
+        created: new Date(),
+        id: taskId.toString(),
+      };
+
+      const updatedTasks = [...tableData, newTask];
+      localStorage.update('tasks', updatedTasks);
+      
+      // 调用外部回调
+      onAddTask?.();
+    }, [tableData, localStorage, onAddTask, autoIncrementId]);
+
+    const handleDeleteTask = useCallback(() => {
+      // 删除所有任务
+      localStorage.update('tasks', []);
+      
+      // 重置表格状态
+      table.onResetPage();
+
+      onDeleteTask?.();
+    }, [localStorage, onDeleteTask, table]);
 
     useEffect(() => {
       // 查询参数变化的时候重新查询
       getList();
     }, [getList]);
 
-    useEffect(() => {
-      if (table.selected.length === 0) return;
-
-      // 找到 tableData 中的选择项
-      const selectedRows = tableData.filter((row) => table.selected.includes(row.sensor_id));
-
-      onSelected?.(selectedRows);
-    }, [onSelected, table.selected, tableData]);
+    // 移除多选相关的useEffect
 
     const dataFiltered = applyFilter({
       inputData: tableData,
-      comparator: getComparator(table.order, table.orderBy),
       filters,
     });
 
-    const dataInPage = dataFiltered.slice(
-      table.page * table.rowsPerPage,
-      table.page * table.rowsPerPage + table.rowsPerPage
-    );
+    const dataSorted = applySorting({
+      inputData: dataFiltered,
+      orderBy: table.orderBy,
+      order: table.order,
+    });
+
+    // const dataInPage = dataFiltered.slice(
+    //   table.page * table.rowsPerPage,
+    //   table.page * table.rowsPerPage + table.rowsPerPage
+    // );
 
     const denseHeight = table.dense ? 60 : 80;
 
@@ -147,46 +145,72 @@ const TaskListView = forwardRef(
       [table]
     );
 
-    const handleDeleteRow = useCallback(
+    // 处理任务完成状态切换
+    const handleTaskComplete = useCallback(
       (id: string) => {
-        const deleteRow = tableData.filter((row) => row.sensor_id !== id);
-        setTableData(deleteRow);
-
-        table.onUpdatePageDeleteRow(dataInPage.length);
+        const updatedTasks = tableData.map((task: ITaskItem) => {
+          if (task.id === id) {
+            return {
+              ...task,
+              due: task.due ? undefined : new Date(), // 如果已完成则取消完成，否则标记为完成
+            };
+          }
+          return task;
+        });
+        localStorage.update('tasks', updatedTasks);
       },
-      [dataInPage.length, table, tableData]
+      [tableData, localStorage]
     );
 
-    const handleDeleteRows = useCallback(() => {
-      const deleteRows = tableData.filter((row) => !table.selected.includes(row.sensor_id));
-      setTableData(deleteRows);
+    // 处理排序
+    const handleSort = useCallback((field: string) => {
+      if (table.orderBy === field) {
+        // 如果点击的是当前排序字段
+        if (table.order === 'asc') {
+          // 第二次点击：从升序切换到降序
+          table.setOrder('desc');
+        } else if (table.order === 'desc') {
+          // 第三次点击：取消排序
+          table.setOrderBy('');
+          table.setOrder('asc'); // 重置为默认升序状态
+        }
+      } else {
+        // 第一次点击新字段：设置为升序
+        table.setOrderBy(field);
+        table.setOrder('asc');
+      }
+    }, [table]);
 
-      table.onUpdatePageDeleteRows({
-        totalRows: tableData.length,
-        totalRowsInPage: dataInPage.length,
-        totalRowsFiltered: dataFiltered.length,
-      });
-    }, [dataFiltered.length, dataInPage.length, table, tableData]);
+    // const handleDeleteRows = useCallback(() => {
+    //   const updatedTasks = tableData.filter((row) => !table.selected.includes(row.sensor_id));
+    //   localStorage.update('tasks', updatedTasks);
 
-    const handleEditRow = (row: ITaskItem) => {
-      // 最佳实现：根据行 ID 读取行信息，然后 setEditRow
-      setEditRow(row);
+    //   table.onUpdatePageDeleteRows({
+    //     totalRows: tableData.length,
+    //     totalRowsInPage: dataInPage.length,
+    //     totalRowsFiltered: dataFiltered.length,
+    //   });
+    // }, [dataFiltered.length, dataInPage.length, table, tableData, localStorage]);
 
-      quickEdit.onTrue();
-    };
+    // const handleEditRow = (row: ITaskItem) => {
+    //   // 最佳实现：根据行 ID 读取行信息，然后 setEditRow
+    //   setEditRow(row);
 
-    const handleRetrieveKey = (row: ITaskItem) => {};
+    //   quickEdit.onTrue();
+    // };
 
-    const handleImportKey = (row: ITaskItem) => {};
+    // const handleRetrieveKey = (row: ITaskItem) => {};
 
-    const handleResetFilters = useCallback(() => {
-      setFilters(defaultFilters);
-    }, [defaultFilters]);
+    // const handleImportKey = (row: ITaskItem) => {};
 
-    const onQuickEditFormSubmitted = () => {
-      getList();
-      quickEdit.onFalse();
-    };
+    // const handleResetFilters = useCallback(() => {
+    //   setFilters(defaultFilters);
+    // }, [defaultFilters]);
+
+    // const onQuickEditFormSubmitted = () => {
+    //   getList();
+    //   quickEdit.onFalse();
+    // };
 
     useImperativeHandle(ref, () => ({
       table,
@@ -200,28 +224,20 @@ const TaskListView = forwardRef(
           </Typography>
 
           <Card>
-            <TaskTableToolbar filters={filters} onFilters={handleFilters} />
+            <TaskTableToolbar filters={filters} onFilters={handleFilters} onAddTask={handleAddTask} onDeleteTask={handleDeleteTask} onSort={handleSort} orderBy={table.orderBy} order={table.order} />
 
-            <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-              <TableSelectedAction
+            <TableContainer  sx={{ position: 'relative', overflow: 'unset' }}>
+              {/* <TableSelectedAction
                 dense={table.dense}
                 numSelected={table.selected.length}
                 rowCount={tableData.length}
                 onSelectAllRows={(checked) =>
                   table.onSelectAllRows(
                     checked,
-                    tableData.map((row) => row.sensor_id)
+                    tableData.map((row: ITaskItem) => row.id)
                   )
                 }
-                // action={
-                //   <Tooltip title={t('Delete')}>
-                //     <IconButton color="primary" onClick={confirm.onTrue}>
-                //       <Iconify icon="solar:trash-bin-trash-bold" />
-                //     </IconButton>
-                //   </Tooltip>
-                // }
-              />
-
+              /> */}
               {/* <Scrollbar> */}
                 <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
                   <TableHeadCustom
@@ -229,39 +245,31 @@ const TaskListView = forwardRef(
                     orderBy={table.orderBy}
                     headLabel={TABLE_HEAD}
                     rowCount={tableData.length}
-                    numSelected={table.selected.length}
-                    onSort={table.onSort}
-                    onSelectAllRows={(checked) =>
-                      table.onSelectAllRows(
-                        checked,
-                        tableData.map((row) => row.sensor_id)
-                      )
-                    }
+                    onSort={handleSort}
                   />
 
                   <TableBody>
                     {loading ? (
-                      [...Array(table.rowsPerPage)].map((i, index) => (
-                        <TableSkeleton key={i.toString()} sx={{ height: denseHeight }} />
+                      [...Array(table.rowsPerPage)].map((_, index) => (
+                        <TableSkeleton key={index.toString()} sx={{ height: denseHeight }} />
                       ))
                     ) : (
-                      dataFiltered
+                      dataSorted
                           .slice(
                             table.page * table.rowsPerPage,
                             table.page * table.rowsPerPage + table.rowsPerPage
                           )
-                          .map((row) => (
+                          .map((row: ITaskItem) => (
                             <TaskTableRow
-                              key={row.name}
+                              key={row.id}
                               row={row}
-                              selected={table.selected.includes(row.sensor_id)}
-                              onSelectRow={() => table.onSelectRow(row.sensor_id)}
-                              onDeleteRow={() => handleDeleteRow(row.sensor_id)}
+                              selected={row.due !== undefined}
+                              onSelectRow={() => handleTaskComplete(row.id)}
                               onSelectLine={onSelectLine}
                               // onEditRow={() => handleEditRow(row.sensor_id)}
-                              onEditRow={() => handleEditRow(row)}
-                              onRetrieveKey={() => handleRetrieveKey(row)}
-                              onImportKey={() => handleImportKey(row)}
+                              onEditRow={() => {}}
+                              onRetrieveKey={() => {}}
+                              onImportKey={() => {}}
                             />
                           ))
                     )}
@@ -301,38 +309,71 @@ export default TaskListView;
 
 function applyFilter({
   inputData,
-  comparator,
   filters,
 }: {
   inputData: ITaskItem[];
-  comparator: (a: any, b: any) => number;
   filters: ITaskTableFilters;
 }) {
-  const { name } = filters;
+  const { status } = filters;
 
-  const stabilizedThis = inputData.map((el, index) => [el, index] as const);
-
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-
-  inputData = stabilizedThis.map((el) => el[0]);
-
-  if (name) {
-    inputData = inputData.filter(
-      (task) => task.name.toLowerCase().indexOf(name.toLowerCase()) !== -1
-    );
+  if (status) {
+    if (status === 'all') {
+      return inputData;
+    }else if (status === 'active') {
+      return inputData.filter((task: ITaskItem) => !task.due);
+    }else if (status === 'completed') {
+      return inputData.filter((task: ITaskItem) => task.due);
+    }
   }
 
-  // if (sites.length) {
-  //   inputData = inputData.filter((task) =>  sites.includes(task.sensor.site));
-  // }
-
-  // if (sites.length) {
-  //   inputData = inputData.filter((task) => sites.includes(task));
-  // }
 
   return inputData;
+}
+
+// ----------------------------------------------------------------------
+
+function applySorting({
+  inputData,
+  orderBy,
+  order,
+}: {
+  inputData: ITaskItem[];
+  orderBy: string;
+  order: 'asc' | 'desc';
+}) {
+  const sorted = [...inputData].sort((a: ITaskItem, b: ITaskItem) => {
+    let comparison = 0;
+
+    switch (orderBy) {
+      case 'due': {
+        // Handle null/undefined values - put them at the end
+        if (!a.due && !b.due) comparison = 0;
+        else if (!a.due) comparison = 1;
+        else if (!b.due) comparison = -1;
+          else comparison = dayjs(a.due).diff(dayjs(b.due));
+        break;
+      }
+      case 'created': {
+        if (!a.created && !b.created) comparison = 0;
+        else if (!a.created) comparison = 1;
+        else if (!b.created) comparison = -1;
+        else comparison = dayjs(a.created).diff(dayjs(b.created));
+        break;
+      }
+      case 'id': {
+        comparison = a.id.localeCompare(b.id, undefined, { numeric: true });
+        break;
+      }
+      case 'title': {
+        comparison = a.title.localeCompare(b.title);
+        break;
+      }
+      default:
+        comparison = 0;
+    }
+
+    return order === 'desc' ? -comparison : comparison;
+  });
+
+  return sorted;
 }
