@@ -1,9 +1,9 @@
 // ----------------------------------------------------------------------
 
 
-export type IDeviceFilterValue = string | string[] | number | number[];
+export type ITaskFilterValue = string | string[] | number | number[];
 
-export type IDeviceFilters = {
+export type ITaskFilters = {
   rating: string;
   gender: string[];
   category: string;
@@ -13,14 +13,14 @@ export type IDeviceFilters = {
 
 // ----------------------------------------------------------------------
 
-export type IDeviceReviewNewForm = {
+export type ITaskReviewNewForm = {
   rating: number | null;
   review: string;
   name: string;
   email: string;
 };
 
-export type IDeviceReview = {
+export type ITaskReview = {
   id: string;
   name: string;
   rating: number;
@@ -32,10 +32,10 @@ export type IDeviceReview = {
   postedAt: Date;
 };
 
-export type IDeviceItem = {
+export type ITaskItem = {
   sensor_id: string;
   site_id: string;
-  name: string; // device name
+  name: string; // task name
   mac_address: string; // mac address
   ip_address: string; // ip address
   port: string; // port
@@ -56,9 +56,9 @@ export type IDeviceItem = {
   last_update_time: string;
 };
 
-export type IDeviceTableFilterValue = string | string[];
+export type ITaskTableFilterValue = string | string[];
 
-export type IDeviceTableFilters = {
+export type ITaskTableFilters = {
   name: string;
   site: string;
   sort_floor_id: boolean;

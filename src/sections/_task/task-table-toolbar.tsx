@@ -2,30 +2,25 @@ import { useCallback, useEffect } from 'react';
 // @mui
 import Stack from '@mui/material/Stack';
 import MenuItem from '@mui/material/MenuItem';
-import TextField from '@mui/material/TextField';
-import InputLabel from '@mui/material/InputLabel';
 import IconButton from '@mui/material/IconButton';
-import FormControl from '@mui/material/FormControl';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import InputAdornment from '@mui/material/InputAdornment';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 // components
 import _ from 'lodash';
 import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 // types
-import { IDeviceTableFilters, IDeviceTableFilterValue } from '../../types/device';
+import { ITaskTableFilters, ITaskTableFilterValue } from '../../types/task';
 import { Button } from '@mui/material';
 
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  filters: IDeviceTableFilters;
-  onFilters: (name: string, value: IDeviceTableFilterValue) => void;
+  filters: ITaskTableFilters;
+  onFilters: (name: string, value: ITaskTableFilterValue) => void;
 };
 
-export default function DeviceTableToolbar({ filters, onFilters }: Props) {
+export default function TaskTableToolbar({ filters, onFilters }: Props) {
 
   const popover = usePopover();
 

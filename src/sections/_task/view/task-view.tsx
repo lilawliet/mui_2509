@@ -3,7 +3,6 @@
 import isEqual from 'lodash/isEqual';
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useState } from 'react';
 // @mui
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import Container from '@mui/material/Container';
 import Table from '@mui/material/Table';
@@ -11,10 +10,6 @@ import TableBody from '@mui/material/TableBody';
 import TableContainer from '@mui/material/TableContainer';
 import Typography from '@mui/material/Typography';
 // routes
-import { Box } from '@mui/material';
-
-import Iconify from 'src/components/iconify';
-// import Scrollbar from 'src/components/scrollbar';
 import {
   emptyRows,
   getComparator,
@@ -27,18 +22,18 @@ import {
   useTable,
 } from 'src/components/table';
 // types
-import { IDeviceItem, IDeviceTableFilters, IDeviceTableFilterValue } from 'src/types/device';
+import { ITaskItem, ITaskTableFilters, ITaskTableFilterValue } from 'src/types/task';
 //
 // import { useLocales } from 'src/locales';
-import DeviceTableRow from 'src/sections/_device/device-table-row';
-import DeviceTableToolbar from 'src/sections/_device/device-table-toolbar';
+import TaskTableRow from 'src/sections/_task/task-table-row';
+import TaskTableToolbar from 'src/sections/_task/task-table-toolbar';
 
 // hooks
 import { useBoolean } from 'src/hooks/use-boolean';
 
 // ----------------------------------------------------------------------
 
-// const defaultFilters: IDeviceTableFilters = {
+// const defaultFilters: ITaskTableFilters = {
 //   name: '',
 //   site: '',
 //   sort_floor_id: false,
@@ -49,7 +44,7 @@ import { useBoolean } from 'src/hooks/use-boolean';
 
 // ----------------------------------------------------------------------
 
-const DeviceListView = forwardRef(
+const TaskListView = forwardRef(
   (
     {
       operations = true,
@@ -65,8 +60,8 @@ const DeviceListView = forwardRef(
       onSelectLine,
     }: {
       operations?: boolean;
-      defaultFilters?: IDeviceTableFilters;
-      onSelected?: (rows: IDeviceItem[]) => void;
+      defaultFilters?: ITaskTableFilters;
+      onSelected?: (rows: ITaskItem[]) => void;
       onSelectLine?: (selected: string[]) => void;
     },
     ref
@@ -77,20 +72,20 @@ const DeviceListView = forwardRef(
 
 
 
-    const [tableData, setTableData] = useState<IDeviceItem[]>([]);
+    const [tableData, setTableData] = useState<ITaskItem[]>([]);
 
     const [filters, setFilters] = useState(defaultFilters);
 
     // const { sites, areas, zones } = useLocationModuleLocal();
 
     // 通过 swr 方式缓存接口返回信息
-    // const { devices, devicesLoading, devicesEmpty } = useGetDevices();
-    // const { devices: datas, devicesLoading: loading, devicesEmpty: empty } = useGetDevices();
+    // const { tasks, tasksLoading, tasksEmpty } = useGetTasks();
+    // const { tasks: datas, tasksLoading: loading, tasksEmpty: empty } = useGetTasks();
 
     const confirm = useBoolean();
 
     const quickEdit = useBoolean();
-    const [editRow, setEditRow] = useState<IDeviceItem>();
+    const [editRow, setEditRow] = useState<ITaskItem>();
 
     // 表头
     const TABLE_HEAD = [
@@ -142,9 +137,9 @@ const DeviceListView = forwardRef(
     const notFound = (!dataFiltered.length && canReset) || empty;
 
     const handleFilters = useCallback(
-      (name: string, value: IDeviceTableFilterValue) => {
+      (name: string, value: ITaskTableFilterValue) => {
         table.onResetPage();
-        setFilters((prevState) => ({
+        setFilters((prevState: ITaskTableFilters) => ({
           ...prevState,
           [name]: value,
         }));
@@ -173,16 +168,16 @@ const DeviceListView = forwardRef(
       });
     }, [dataFiltered.length, dataInPage.length, table, tableData]);
 
-    const handleEditRow = (row: IDeviceItem) => {
+    const handleEditRow = (row: ITaskItem) => {
       // 最佳实现：根据行 ID 读取行信息，然后 setEditRow
       setEditRow(row);
 
       quickEdit.onTrue();
     };
 
-    const handleRetrieveKey = (row: IDeviceItem) => {};
+    const handleRetrieveKey = (row: ITaskItem) => {};
 
-    const handleImportKey = (row: IDeviceItem) => {};
+    const handleImportKey = (row: ITaskItem) => {};
 
     const handleResetFilters = useCallback(() => {
       setFilters(defaultFilters);
@@ -205,7 +200,7 @@ const DeviceListView = forwardRef(
           </Typography>
 
           <Card>
-            <DeviceTableToolbar filters={filters} onFilters={handleFilters} />
+            <TaskTableToolbar filters={filters} onFilters={handleFilters} />
 
             <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
               <TableSelectedAction
@@ -256,7 +251,7 @@ const DeviceListView = forwardRef(
                             table.page * table.rowsPerPage + table.rowsPerPage
                           )
                           .map((row) => (
-                            <DeviceTableRow
+                            <TaskTableRow
                               key={row.name}
                               row={row}
                               selected={table.selected.includes(row.sensor_id)}
@@ -300,7 +295,7 @@ const DeviceListView = forwardRef(
   }
 );
 
-export default DeviceListView;
+export default TaskListView;
 
 // ----------------------------------------------------------------------
 
@@ -309,9 +304,9 @@ function applyFilter({
   comparator,
   filters,
 }: {
-  inputData: IDeviceItem[];
+  inputData: ITaskItem[];
   comparator: (a: any, b: any) => number;
-  filters: IDeviceTableFilters;
+  filters: ITaskTableFilters;
 }) {
   const { name } = filters;
 
@@ -327,16 +322,16 @@ function applyFilter({
 
   if (name) {
     inputData = inputData.filter(
-      (device) => device.name.toLowerCase().indexOf(name.toLowerCase()) !== -1
+      (task) => task.name.toLowerCase().indexOf(name.toLowerCase()) !== -1
     );
   }
 
   // if (sites.length) {
-  //   inputData = inputData.filter((device) =>  sites.includes(device.sensor.site));
+  //   inputData = inputData.filter((task) =>  sites.includes(task.sensor.site));
   // }
 
   // if (sites.length) {
-  //   inputData = inputData.filter((device) => sites.includes(device));
+  //   inputData = inputData.filter((task) => sites.includes(task));
   // }
 
   return inputData;

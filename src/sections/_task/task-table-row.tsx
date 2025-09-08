@@ -6,20 +6,20 @@ import ListItemText from '@mui/material/ListItemText';
 import MenuItem from '@mui/material/MenuItem';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
-import { useRef, useState } from 'react';
+import {  useState } from 'react';
 import { useBoolean } from 'src/hooks/use-boolean';
 // components
 // import { ConfirmDialog } from 'src/components/custom-dialog';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 import Iconify from 'src/components/iconify';
 // types
-import { IDeviceItem } from 'src/types/device';
-import { ILineItem } from 'src/types/line';
+import type { ITaskItem } from 'src/types/task';
+import type { ILineItem } from 'src/types/line';
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  row: IDeviceItem;
+  row: ITaskItem;
   selected: boolean;
   onEditRow: VoidFunction;
   onSelectRow: VoidFunction;
@@ -29,7 +29,7 @@ type Props = {
   onRetrieveKey: VoidFunction;
 };
 
-export default function DeviceTableRow({
+export default function TaskTableRow({
   row,
   selected,
   onSelectRow,
@@ -42,7 +42,7 @@ export default function DeviceTableRow({
   const {
     sensor_id, // sensor id
     site_id, // site id
-    name, // device name
+    name, // task name
     mac_address, // mac_address address
     ip_address, // ip address
     port, // port
@@ -73,8 +73,8 @@ export default function DeviceTableRow({
 
   const collapseToggle = () => {
     if (!Initialized.value) {
-      // get lines by device id
-      // getDeviceLine({
+      // get lines by task id
+      // getTaskLine({
       //   sensor_id,
       //   site_id,
       // })
