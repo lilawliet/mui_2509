@@ -1,10 +1,13 @@
 // @mui
 import type { Theme, SxProps } from '@mui/material/styles';
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
 import TableRow from '@mui/material/TableRow';
 import TableHead from '@mui/material/TableHead';
 import TableCell from '@mui/material/TableCell';
 import TableSortLabel from '@mui/material/TableSortLabel';
+// components
+import Iconify from 'src/components/iconify';
 
 // ----------------------------------------------------------------------
 
@@ -31,6 +34,7 @@ type Props = {
     width?: number;
     minWidth?: number;
     align?: 'left' | 'right' | 'center';
+    icon?: string;
   }>;
   rowCount?: number;
   onSort?: (id: string) => void;
@@ -65,7 +69,12 @@ export default function TableHeadCustom({
                 direction={orderBy === headCell.id ? order : 'asc'}
                 onClick={() => onSort(headCell.id)}
               >
-                {headCell.label}
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  {headCell.icon && (
+                    <Iconify icon={headCell.icon} width={18} height={18} />
+                  )}
+                  <Box component="span">{headCell.label}</Box>
+                </Stack>
 
                 {orderBy === headCell.id ? (
                   <Box sx={{ ...visuallyHidden }}>
@@ -74,7 +83,12 @@ export default function TableHeadCustom({
                 ) : null}
               </TableSortLabel>
             ) : (
-              headCell.label
+              <Stack direction="row" alignItems="center" spacing={1}>
+                {headCell.icon && (
+                  <Iconify icon={headCell.icon} width={18} height={18} />
+                )}
+                <Box component="span">{headCell.label}</Box>
+              </Stack>
             )}
           </TableCell>
         ))}

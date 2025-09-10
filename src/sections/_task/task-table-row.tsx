@@ -1,5 +1,5 @@
 // @mui
-import Checkbox from '@mui/material/Checkbox';
+import Radio from '@mui/material/Radio';
 import ListItemText from '@mui/material/ListItemText';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
@@ -46,7 +46,7 @@ export default function TaskTableRow({
     
       <TableRow hover selected={selected}>
         <TableCell padding="checkbox">
-          <Checkbox
+          <Radio
             checked={selected}
             onClick={() => {
               onSelectRow();

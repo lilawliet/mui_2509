@@ -2,7 +2,6 @@
 import Stack from '@mui/material/Stack';
 import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
-import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Divider from '@mui/material/Divider';
 import ListItemIcon from '@mui/material/ListItemIcon';
@@ -12,6 +11,7 @@ import Iconify from 'src/components/iconify';
 import CustomPopover, { usePopover } from 'src/components/custom-popover';
 // types
 import type { ITaskTableFilters, ITaskTableFilterValue } from '../../types/task';
+import { Button } from '@mui/material';
 
 
 // ----------------------------------------------------------------------
@@ -66,6 +66,7 @@ export default function TaskTableToolbar({ filters, onAddTask, onDeleteTask ,onF
           {/* New Task */}
           <Button
             variant="contained"
+            color="primary"
             startIcon={<Iconify icon="material-symbols-light:add" />}
             onClick={onAddTask}
           >

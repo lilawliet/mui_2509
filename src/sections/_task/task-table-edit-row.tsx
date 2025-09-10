@@ -44,6 +44,7 @@ const TaskTableEditRow = forwardRef<TaskTableEditRowRef, Props>(({
 
         <TableCell>
           <TextField
+            color="primary"
             inputRef={inputRef}
             label="New Task"
             value={inputValue}

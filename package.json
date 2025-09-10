@@ -19,12 +19,14 @@
     "@mui/x-date-pickers": "^8.11.1",
     "@types/lodash": "^4.17.20",
     "dayjs": "^1.11.18",
+    "framer-motion": "^12.23.12",
     "lodash": "^4.17.21",
     "next": "^15.0.0",
     "notistack": "^3.0.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-helmet-async": "^2.0.5"
+    "react-helmet-async": "^2.0.5",
+    "simplebar-react": "^3.3.2"
   },
   "devDependencies": {
     "@types/node": "latest",

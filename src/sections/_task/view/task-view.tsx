@@ -28,6 +28,7 @@ import { useLocalStorage } from 'src/hooks/use-local-storage';
 import { useAutoIncrementId } from 'src/hooks/use-auto-increment-id';
 import dayjs from 'dayjs';
 import TaskTableEditRow, { type TaskTableEditRowRef } from '../task-table-edit-row';
+import { useSettingsContext } from '@/components/settings';
 
 // ----------------------------------------------------------------------
 
@@ -63,10 +64,10 @@ const TaskListView = forwardRef(
 
     // 表头
     const TABLE_HEAD = [
-      { id: 'title', label: 'Task Title', width: 240 },
-      { id: 'due', label: 'Due Date', width: 200 },
-      { id: 'created', label: 'Created at', width: 200 },
-      { id: 'id', label: 'Tasks ID', width: 80, align: 'right' as const },
+      { id: 'title', label: 'Task Title', width: 240, icon: 'material-symbols:task-alt' },
+      { id: 'due', label: 'Due Date', width: 200, icon: 'material-symbols:calendar-today' },
+      { id: 'created', label: 'Created at', width: 200, icon: 'material-symbols:schedule' },
+      { id: 'id', label: 'Tasks ID', width: 80, align: 'right' as const, icon: 'material-symbols:tag' },
     ];
 
     const [loading, setLoading] = useState(false);
@@ -202,9 +203,12 @@ const TaskListView = forwardRef(
       table,
     }));
 
+    // 全局设置
+    const settings = useSettingsContext();
+
     return (
     
-        <Container maxWidth={'lg'}>
+        <Container maxWidth={settings.themeStretch ? false : 'lg'}>
           <Typography variant="h4" sx={{ mb: 3 }}>
             Tasks
           </Typography>
