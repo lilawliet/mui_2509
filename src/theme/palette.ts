@@ -111,6 +111,8 @@ const COMMON = {
   },
 };
 
+
+// 调色板
 export function palette(mode: 'light' | 'dark') {
   const light = {
     ...COMMON,

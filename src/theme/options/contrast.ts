@@ -3,6 +3,8 @@ import { customShadows } from '../custom-shadows';
 
 // ----------------------------------------------------------------------
 
+
+// 对比度
 export function contrast(contrastBold: boolean, mode: 'light' | 'dark') {
   const theme = {
     ...(contrastBold &&
