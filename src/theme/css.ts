@@ -4,6 +4,8 @@ import { dividerClasses } from '@mui/material/Divider';
 import { checkboxClasses } from '@mui/material/Checkbox';
 import { menuItemClasses } from '@mui/material/MenuItem';
 import { autocompleteClasses } from '@mui/material/Autocomplete';
+// utils
+import { getAssetPath } from 'src/utils/get-asset-path';
 
 // ----------------------------------------------------------------------
 
@@ -24,7 +26,7 @@ export const paper = ({
       color: bgcolor,
     }),
   }),
-  backgroundImage: 'url(/assets/cyan-blur.png), url(/assets/red-blur.png)',
+  backgroundImage: `url(${getAssetPath('/assets/cyan-blur.png')}), url(${getAssetPath('/assets/red-blur.png')})`,
   backgroundRepeat: 'no-repeat, no-repeat',
   backgroundPosition: 'top right, left bottom',
   backgroundSize: '50%, 50%',
