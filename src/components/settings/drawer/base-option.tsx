@@ -4,6 +4,8 @@ import Stack from '@mui/material/Stack';
 import ButtonBase from '@mui/material/ButtonBase';
 //
 import SvgColor from '../../svg-color';
+// utils
+import { getSettingIconPath } from 'src/utils/get-asset-path';
 
 // ----------------------------------------------------------------------
 
@@ -49,7 +51,7 @@ export default function BaseOptions({ icons, options, value, onChange }: Props) 
               },
             }}
           >
-            <SvgColor src={`/assets/icons/setting/ic_${index === 0 ? icons[0] : icons[1]}.svg`} />
+            <SvgColor src={getSettingIconPath(index === 0 ? icons[0] : icons[1])} />
           </ButtonBase>
         );
       })}
